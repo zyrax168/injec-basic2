@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INJECTOR ZYXZ BASIC V2.0</title>
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-cyan: #00ffcc;
+            --neon-purple: #7000ff;
+            --neon-green: #00ff66;
+            --bg-dark: #020205;
+            --panel-bg: rgba(7, 7, 12, 0.45); 
+            --card-bg: rgba(255, 255, 255, 0.015);
+            --card-border: rgba(255, 255, 255, 0.04);
+            --text-main: #ffffff;
+            --text-dim: #6c6c7a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- CYBER BACKGROUND SYSTEM --- */
+        .bg-matrix-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .nebula-glow {
+            position: absolute;
+            width: 150%; height: 150%;
+            top: -25%; left: -25%;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(112, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(5, 5, 10, 1) 0%, transparent 100%);
+            filter: blur(80px);
+            animation: nebulaShift 25s ease infinite alternate;
+        }
+
+        @keyframes nebulaShift {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.15) rotate(5deg); }
+        }
+
+        .perspective-grid {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 60%;
+            background-image: 
+                linear-gradient(to right, rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            transform: perspective(250px) rotateX(60deg);
+            transform-origin: bottom;
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 10%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 10%, transparent 100%);
+            animation: gridScroll 3s linear infinite;
+        }
+
+        @keyframes gridScroll {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 60px; }
+        }
+
+        #cyber-canvas {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+
+        /* --- DASHBOARD PANEL --- */
+        .glow-wrapper {
+            position: relative;
+            padding: 1px;
+            border-radius: 24px;
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.35) 0%, rgba(255, 255, 255, 0.01) 40%, rgba(112, 0, 255, 0.15));
+            z-index: 1;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.12);
+            width: 90%;
+            max-width: 380px; 
+        }
+
+        .main-panel {
+            width: 100%;
+            background: var(--panel-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 23px;
+            padding: 28px 24px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.84), inset 0 1px 0 rgba(255,255,255,0.04);
+            border: 1px solid rgba(255, 255, 255, 0.01);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .system-status {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--neon-cyan);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        .pulse-node {
+            width: 5px;
+            height: 5px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-cyan);
+            animation: pulseGlow 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 12px var(--neon-cyan); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        .glitch-title {
+            font-size: 26px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.4s, background-color 0.4s;
+        }
+
+        .featured-row {
+            border-color: rgba(0, 240, 255, 0.1);
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.1);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to { transform: scale(4); opacity: 0; }
+        }
+
+        .label-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 1;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .title-text {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .desc-text {
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+            width: 100%;
+            max-width: 180px;
+        }
+
+        .custom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #101015;
+            outline: none;
+        }
+
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            cursor: pointer;
+        }
+
+        .control-row.active-row .custom-slider::-webkit-slider-thumb {
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+        }
+
+        .slider-val {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .control-row.active-row .slider-val {
+            color: var(--neon-blue);
+        }
+
+        .status-tracker {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--neon-blue);
+            margin-top: 2px;
+            display: none;
+        }
+
+        .interactive-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1;
+        }
+
+        .toggle-status-text {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #ff3366;
+            opacity: 0.4;
+            min-width: 38px;
+            text-align: right;
+        }
+
+        .toggle-status-text.status-active {
+            color: var(--neon-cyan);
+            opacity: 1;
+        }
+
+        .tg-switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+
+        .tg-switch input { opacity: 0; width: 0; height: 0; }
+
+        .tg-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #101015;
+            border-radius: 100px;
+            transition: 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .tg-slider::before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background: #4a4a5a;
+            border-radius: 50%;
+            transition: 0.3s ease;
+        }
+
+        input:checked + .tg-slider {
+            border-color: var(--neon-blue);
+        }
+
+        input:checked + .tg-slider::before {
+            transform: translateX(22px);
+            background: var(--neon-blue);
+            box-shadow: 0 0 6px var(--neon-blue);
+        }
+
+        /* --- GAME BUTTON GROUP --- */
+        .game-btn-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .game-btn-row {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 4px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-ff-normal {
+            background: rgba(0, 240, 255, 0.02);
+            border: 1px dashed rgba(0, 240, 255, 0.2);
+        }
+        .btn-ff-normal:hover {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+        }
+
+        .btn-ff-max {
+            background: rgba(112, 0, 255, 0.02);
+            border: 1px dashed rgba(112, 0, 255, 0.2);
+        }
+        .btn-ff-max:hover {
+            background: rgba(112, 0, 255, 0.08);
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px rgba(112, 0, 255, 0.15);
+        }
+
+        footer {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .footer-status-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--neon-cyan);
+            border-radius: 50%;
+            animation: footerPulse 1.8s infinite ease-in-out;
+        }
+
+        .footer-status-text {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        @keyframes footerPulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px var(--neon-cyan); }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* --- SOCIAL BUTTON CONTAINER --- */
+        .social-shortcut-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .social-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(7, 7, 12, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: #5c5c6a;
+        }
+
+        .social-btn.wa-btn:hover { border-color: #25D366; }
+        .social-btn.wa-btn:hover svg { fill: #25D366; }
+
+        .social-btn.tg-btn:hover { border-color: var(--neon-blue); }
+        .social-btn.tg-btn:hover svg { fill: var(--neon-blue); }
+
+        .social-btn.tt-btn:hover { border-color: #fff; }
+        .social-btn.tt-btn:hover svg { fill: #ffffff; }
+    </style>
+</head>
+<body>
+
+    <div class="bg-matrix-container">
+        <div class="nebula-glow"></div>
+        <div class="perspective-grid"></div>
+        <canvas id="cyber-canvas"></canvas>
+    </div>
+
+    <div class="glow-wrapper">
+        <div class="main-panel">
+            <header>
+                <div class="system-status">
+                    <div class="pulse-node"></div>
+                    <span>SYSTEM ONLINE</span>
+                </div>
+                <div class="glitch-title">ZYXZ BASIC V2.0</div>
+            </header>
+
+            <div class="grid-container">
+                <div class="control-row featured-row" onclick="createRipple(event)">
+                    <div class="label-group">
+                        <span class="title-text" style="color: #fff;">Optimize System</span>
+                        <span class="desc-text">Membersihkan proses latar belakang.</span>
+                        <span class="status-tracker"></span>
+                    </div>
+                    <div class="interactive-controls">
+                        <span class="toggle-status-text">Mati</span>
+                        <label class="tg-switch">
+                            <input type="checkbox" onchange="handleVisualToggleOnly(this)">
+                            <span class="tg-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-row" id="row-drag" onclick="createRipple(event)">
+                    <div class="label-group">
+                        <span class="title-text">Smooth Drag</span>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="100" value="0" class="custom-slider" id="drag-range" disabled oninput="updateSliderVal(this.value)">
+                            <span class="slider-val" id="drag-val">0%</span>
+                        </div>
+                    </div>
+                    <div class="interactive-controls">
+                        <span class="toggle-status-text" id="status-text-drag">Mati</span>
+                        <label class="tg-switch">
+                            <input type="checkbox" onchange="toggleSliderRow(this, 'row-drag', 'drag-range', 'status-text-drag')">
+                            <span class="tg-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-row" id="row-headshot" onclick="createRipple(event)">
+                    <div class="label-group">
+                        <span class="title-text">Drag Headshot</span>
+                        <div class="slider-container">
+                            <input type="range" min="0" max="100" value="0" class="custom-slider" id="headshot-range" disabled oninput="updateHeadshotVal(this.value)">
+                            <span class="slider-val" id="headshot-val">0%</span>
+                        </div>
+                    </div>
+                    <div class="interactive-controls">
+                        <span class="toggle-status-text" id="status-text-headshot">Mati</span>
+                        <label class="tg-switch">
+                            <input type="checkbox" onchange="toggleSliderRow(this, 'row-headshot', 'headshot-range', 'status-text-headshot')">
+                            <span class="tg-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-row" onclick="createRipple(event)">
+                    <div class="label-group">
+                        <span class="title-text">Smooth High</span>
+                        <span class="desc-text">Alokasi memori objek rendering grafis.</span>
+                        <span class="status-tracker"></span>
+                    </div>
+                    <div class="interactive-controls">
+                        <span class="toggle-status-text">Mati</span>
+                        <label class="tg-switch">
+                            <input type="checkbox" onchange="handleVisualToggleOnly(this)">
+                            <span class="tg-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-row" onclick="createRipple(event)">
+                    <div class="label-group">
+                        <span class="title-text">Unlock 120 FPS</span>
+                        <span class="desc-text">Modifikasi batas ambang visual layar.</span>
+                        <span class="status-tracker"></span>
+                    </div>
+                    <div class="interactive-controls">
+                        <span class="toggle-status-text">Mati</span>
+                        <label class="tg-switch">
+                            <input type="checkbox" onchange="handleUnlockFPSReal(this)">
+                            <span class="tg-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="control-row" onclick="createRipple(event)">
+                    <div class="label-group">
+                        <span class="title-text">Clear Cache</span>
+                        <span class="desc-text">Pembersihan sisa kompilasi runtime.</span>
+                        <span class="status-tracker"></span>
+                    </div>
+                    <div class="interactive-controls">
+                        <span class="toggle-status-text">Mati</span>
+                        <label class="tg-switch">
+                            <input type="checkbox" onchange="handleClearCacheReal(this)">
+                            <span class="tg-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="game-btn-group">
+                    <a href="market://launch?id=com.dts.freefireth" class="game-btn-row btn-ff-normal" onclick="createRipple(event)">
+                        ⚡ OPEN FF TH
+                    </a>
+                    <a href="market://launch?id=com.dts.freefiremax" class="game-btn-row btn-ff-max" onclick="createRipple(event)">
+                        🔥 OPEN FF MAX
+                    </a>
+                </div>
+            </div>
+
+            <footer>
+                <div class="footer-status-dot"></div>
+                <div class="footer-status-text">Online</div>
+            </footer>
+        </div>
+    </div>
+
+    <div class="social-shortcut-container">
+        <a href="https://wa.me/6285739752421" target="_blank" class="social-btn wa-btn" title="WhatsApp">
+            <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.503-5.734-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.858.002-2.634-1.023-5.11-2.885-6.974-1.862-1.863-4.339-2.887-6.977-2.888-5.442 0-9.866 4.42-9.87 9.86-.001 1.716.463 3.39 1.34 4.869l-.98 3.577 3.683-.965zm10.213-3.712c-.276-.139-1.637-.808-1.89-.9-.254-.093-.439-.139-.623.139-.184.277-.714.9-.873 1.084-.159.185-.317.208-.593.069-.276-.139-1.167-.43-2.223-1.372-.823-.734-1.378-1.641-1.54-1.918-.162-.277-.017-.427.121-.565.125-.124.276-.323.415-.485.139-.161.185-.277.276-.462.093-.185.047-.347-.024-.485-.07-.14-.624-1.502-.855-2.058-.225-.54-.453-.466-.623-.475-.16-.009-.344-.01-.529-.01-.184 0-.485.07-.739.347-.254.277-.969.947-.969 2.312 0 1.365.993 2.686 1.133 2.871.14.185 1.954 2.984 4.733 4.183.661.285 1.178.455 1.58.583.664.211 1.269.181 1.747.11.533-.08 1.637-.669 1.868-1.316.23-.647.23-1.202.162-1.316-.069-.115-.254-.185-.53-.324z"/></svg>
+        </a>
+        <a href="https://t.me/zyraxofficiall" target="_blank" class="social-btn tg-btn" title="Telegram">
+            <svg viewBox="0 0 24 24"><path d="M23.91 2.312C23.75 1.61 23.05 1.14 22.34 1.3l-21 7.235c-.68.234-.735 1.155-.094 1.488l5.12 2.66c.55.286 1.234.195 1.68-.225l10.02-9.4c.12-.11.29-.03.22.12l-8.15 10.08c-.41.51-.31 1.25.21 1.64l6.32 4.76c.59.44 1.43.14 1.62-.59l4-15.5c.18-.705-.01-1.422-.38-1.906z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@zyraxx222" target="_blank" class="social-btn tt-btn" title="TikTok">
+            <svg viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.01 1.63 4.13.98 1.09 2.36 1.77 3.82 1.94v3.91c-1.11-.13-2.19-.57-3.13-1.19-.74-.5-1.36-1.16-1.82-1.93v6.08c.03 2.04-.64 4.09-1.97 5.61-1.48 1.73-3.78 2.68-6.03 2.45-2.61-.21-4.99-2.02-5.74-4.54-.9-2.89.26-6.19 2.76-7.66.86-.53 1.84-.81 2.84-.83v3.93c-.8.06-1.58.42-2.12 1.01-.76.8-.93 2.06-.41 3.07.5 1.02 1.63 1.67 2.77 1.57 1.25-.06 2.31-1.07 2.41-2.32.03-1.47.01-2.94.02-4.41V.02z"/></svg>
+        </a>
+    </div>
+
+    <script>
+        let fpsIntervalId = null;
+
+        // Fungsi kontrol saklar on/off dinamis untuk baris slider
+        function toggleSliderRow(checkbox, cardId, sliderId, statusTextId) {
+            const card = document.getElementById(cardId);
+            const slider = document.getElementById(sliderId);
+            const statusText = document.getElementById(statusTextId);
+            
+            if (checkbox.checked) {
+                card.classList.add('active-row');
+                card.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                card.style.backgroundColor = 'rgba(0, 240, 255, 0.02)';
+                slider.disabled = false;
+                
+                statusText.innerText = "Aktif";
+                statusText.classList.add('status-active');
+            } else {
+                card.classList.remove('active-row');
+                card.style.borderColor = 'var(--card-border)';
+                card.style.backgroundColor = 'var(--card-bg)';
+                slider.disabled = true;
+                
+                statusText.innerText = "Mati";
+                statusText.classList.remove('status-active');
+            }
+        }
+
+        function updateSliderVal(val) {
+            document.getElementById('drag-val').innerText = val + '%';
+        }
+
+        function updateHeadshotVal(val) {
+            document.getElementById('headshot-val').innerText = val + '%';
+        }
+
+        function updateStatusTextOnly(checkbox, isActive) {
+            const container = checkbox.closest('.interactive-controls');
+            const statusText = container.querySelector('.toggle-status-text');
+            if (isActive) {
+                statusText.innerText = "Aktif";
+                statusText.classList.add('status-active');
+            } else {
+                statusText.innerText = "Mati";
+                statusText.classList.remove('status-active');
+            }
+        }
+
+        function handleUnlockFPSReal(checkbox) {
+            const card = checkbox.closest('.control-row');
+            const descText = card.querySelector('.desc-text');
+            const tracker = card.querySelector('.status-tracker');
+
+            if (checkbox.checked) {
+                card.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                card.style.backgroundColor = 'rgba(0, 240, 255, 0.02)';
+                descText.style.display = 'none';
+                tracker.style.display = 'block';
+                tracker.style.color = 'var(--neon-blue)';
+                tracker.innerText = '[ STABILIZING REFRESH RATE... ]';
+
+                let runFpsUnlocker = true;
+                function forceHighTickRate() {
+                    if (!runFpsUnlocker) return;
+                    window.requestAnimationFrame(forceHighTickRate);
+                }
+                window.requestAnimationFrame(forceHighTickRate);
+                fpsIntervalId = () => { runFpsUnlocker = false; };
+
+                setTimeout(() => {
+                    tracker.innerText = '[ 120 FPS UNLOCKED & ACTIVE ]';
+                    tracker.style.color = 'var(--neon-cyan)';
+                    updateStatusTextOnly(checkbox, true);
+                }, 1200);
+
+            } else {
+                if (fpsIntervalId) {
+                    fpsIntervalId();
+                    fpsIntervalId = null;
+                }
+                card.style.borderColor = 'var(--card-border)';
+                card.style.backgroundColor = 'var(--card-bg)';
+                descText.style.display = 'block';
+                tracker.style.display = 'none';
+                tracker.innerText = '';
+                updateStatusTextOnly(checkbox, false);
+            }
+        }
+
+        async function handleClearCacheReal(checkbox) {
+            const card = checkbox.closest('.control-row');
+            const descText = card.querySelector('.desc-text');
+            const tracker = card.querySelector('.status-tracker');
+
+            if (checkbox.checked) {
+                card.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                card.style.backgroundColor = 'rgba(0, 240, 255, 0.02)';
+                descText.style.display = 'none';
+                tracker.style.display = 'block';
+                tracker.style.color = 'var(--neon-blue)';
+                tracker.innerText = '[ CLEANING CACHE... ]';
+
+                setTimeout(() => {
+                    tracker.innerText = '[ CACHE CLEARED SUCCESS ]';
+                    tracker.style.color = 'var(--neon-cyan)';
+                    updateStatusTextOnly(checkbox, true);
+                }, 1000);
+            } else {
+                card.style.borderColor = 'var(--card-border)';
+                card.style.backgroundColor = 'var(--card-bg)';
+                descText.style.display = 'block';
+                tracker.style.display = 'none';
+                tracker.innerText = '';
+                updateStatusTextOnly(checkbox, false);
+            }
+        }
+
+        function handleVisualToggleOnly(checkbox) {
+            const card = checkbox.closest('.control-row');
+            const descText = card.querySelector('.desc-text');
+            const tracker = card.querySelector('.status-tracker');
+
+            if (checkbox.checked) {
+                card.style.borderColor = 'rgba(0, 240, 255, 0.3)';
+                card.style.backgroundColor = 'rgba(0, 240, 255, 0.02)';
+                descText.style.display = 'none';
+                tracker.style.display = 'block';
+                
+                let progress = 0;
+                tracker.style.color = 'var(--neon-blue)';
+                
+                const interval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 20) + 10;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        tracker.innerText = '[ COMPLETED ]';
+                        tracker.style.color = 'var(--neon-cyan)';
+                        updateStatusTextOnly(checkbox, true);
+                    } else {
+                        tracker.innerText = `[ PROCESSING SYSTEM... ${progress}% ]`;
+                    }
+                }, 100);
+                
+                checkbox.dataset.intervalId = interval;
+            } else {
+                clearInterval(checkbox.dataset.intervalId);
+                card.style.borderColor = 'var(--card-border)';
+                card.style.backgroundColor = 'var(--card-bg)';
+                descText.style.display = 'block';
+                tracker.style.display = 'none';
+                tracker.innerText = '';
+                updateStatusTextOnly(checkbox, false);
+            }
+        }
+
+        function createRipple(event) {
+            if (event.target.classList.contains('custom-slider')) return;
+            const row = event.currentTarget;
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            const rect = row.getBoundingClientRect();
+            ripple.style.left = `${event.clientX - rect.left}px`;
+            ripple.style.top = `${event.clientY - rect.top}px`;
+            row.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        }
+
+        /* --- CYBER NET BACKGROUND GENERATOR --- */
+        const canvas = document.getElementById('cyber-canvas');
+        const ctx = canvas.getContext('2d');
+        let nodes = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class CyberNode {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() * 0.5) - 0.25;
+                this.vy = (Math.random() * 0.5) - 0.25;
+                this.radius = Math.random() * 4 + 2; 
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(0, 240, 255, 0.8)';
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.85)';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        const totalNodes = 55;
+        for(let i = 0; i < totalNodes; i++) nodes.push(new CyberNode());
+
+        function animateCyberNet() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for(let i = 0; i < nodes.length; i++) {
+                for(let j = i + 1; j < nodes.length; j++) {
+                    let dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+                    if(dist < 150) { 
+                        ctx.beginPath();
+                        ctx.moveTo(nodes[i].x, nodes[i].y);
+                        ctx.lineTo(nodes[j].x, nodes[j].y);
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.25 * (1 - dist/150)})`;
+                        ctx.lineWidth = 1.2;
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            nodes.forEach(node => {
+                node.update();
+                node.draw();
+            });
+            requestAnimationFrame(animateCyberNet);
+        }
+        animateCyberNet();
+    </script>
+</body>
+</html>
